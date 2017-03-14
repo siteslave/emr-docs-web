@@ -1,0 +1,17 @@
+<div class="login-wrapper">
+    <form class="login">
+        <label class="title">
+            โรงพยาบาลกันทรวิชัย<span class="trademark">&#8482;</span>
+            <br>
+            โปรแกรมจัดการเอกสารผู้ป่วย&#174;
+        </label>
+        <div class="login-group">
+            <input class="username" name="username" [(ngModel)]="username" type="text" id="login_username" placeholder="Username">
+            <input class="password" name="password" [(ngModel)]="password" type="password" id="login_password" placeholder="Password">
+            <div class="error active" *ngIf="isError">
+                ชื่อผู้ใช้งานและรหัสผ่าน ไม่ถูกต้อง
+            </div>
+            <button type="submit" class="btn btn-primary" (click)="login()" [disabled]="!username || !password">LOG IN</button>
+        </div>
+    </form>
+</div>

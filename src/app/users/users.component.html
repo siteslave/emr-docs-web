@@ -1,0 +1,60 @@
+<div class="main-container">
+  <header class="header-5">
+    <div class="branding">
+      <a href="javascript: void()" class="nav-link">
+        <clr-icon shape="data-cluster"></clr-icon>
+        <span class="title">โปรแกรมจัดการเอกสารประวัติผู้ป่วย (Uploader)</span>
+      </a>
+    </div>
+    <div class="header-actions">
+      <clr-dropdown class="dropdown bottom-right">
+        <button class="nav-text" clrDropdownToggle>
+            {{fullname}}
+            <clr-icon shape="caret down"></clr-icon>
+        </button>
+        <div class="dropdown-menu">
+          <a href="javascript: void()" (click)="logout()" clrDropdownItem>ออกจากระบบ</a>
+        </div>
+      </clr-dropdown>
+    </div>
+  </header>
+  <div class="content-container">
+    <div class="content-area">
+
+      <router-outlet></router-outlet>
+
+    </div>
+    <nav class="sidenav">
+      <header class="header-5">
+        <form class="search" onsubmit="return false;">
+          <label for="search_input">
+            <input #hn autocomplete="off" (keypress)="searchKeyPress($event, hn)" id="search_input" type="text" placeholder="ระบุ HN...">
+        </label>
+        </form>
+      </header>
+      <!--<div class="progress danger loop" *ngIf="searching">
+        <progress></progress>
+      </div>-->
+      <div class="content-area">
+        <span class="spinner spinner-inline" *ngIf="searching">
+            Loading...
+        </span>
+        <span *ngIf="searching">
+            กรุณารอซักครู่...
+        </span>
+        <clr-tree-node *ngFor="let visit of visits" [clrTreeNodeExpandable]="true">
+          <clr-icon shape="calendar"></clr-icon>
+          {{ visit.name }}
+          <clr-tree-node *ngFor="let v of visit.visits">
+            <button (click)="getEmr(v.hn, v.vn)" class="clr-treenode-link">
+            <clr-icon shape="calendar"></clr-icon>
+            {{v.vstdate}} {{ v.time }}
+            </button>
+
+          </clr-tree-node>
+        </clr-tree-node>
+      </div>
+
+    </nav>
+  </div>
+</div>

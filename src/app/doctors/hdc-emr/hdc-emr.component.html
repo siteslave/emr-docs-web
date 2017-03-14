@@ -1,0 +1,105 @@
+<span class="spinner spinner-inline" *ngIf="isLoading">
+    Loading...
+</span>
+<span *ngIf="isLoading">
+    กรุณารอซักครู่...
+</span>
+<clr-stack-view>
+  <clr-stack-block [clrSbExpanded]="true">
+    <clr-stack-label>ชื่อ {{ service.ptname }}</clr-stack-label>
+    <clr-stack-content>เพศ {{ service.sex }}</clr-stack-content>
+    <clr-stack-block>
+      <clr-stack-label>วันเกิด {{ service.birth }}</clr-stack-label>
+      <clr-stack-content>อายุ (ณ วันที่รับบริการ) {{ service.age | number }} (ปี)</clr-stack-content>
+    </clr-stack-block>
+    <clr-stack-block>
+      <clr-stack-label>หน่วยบริการที่ให้บริการ</clr-stack-label>
+      <clr-stack-content>
+        <span class="label label-info">{{ service.hospcode }} {{ service.hospname }}</span>
+      </clr-stack-content>
+    </clr-stack-block>
+  </clr-stack-block>
+
+  <clr-stack-block [clrSbExpanded]="true">
+    <clr-stack-label>ข้อมูลรับบริการ</clr-stack-label>
+    <!--<clr-stack-content>แผนก {{ department }}</clr-stack-content>-->
+    <clr-stack-block>
+      <clr-stack-label>สิทธิการรักษา</clr-stack-label>
+      <clr-stack-content>{{ service.instype }}</clr-stack-content>
+    </clr-stack-block>
+    <clr-stack-block>
+      <clr-stack-label>วันที่ {{ service.date_serv }}</clr-stack-label>
+      <clr-stack-content>เวลา {{ service.time_serv }}</clr-stack-content>
+    </clr-stack-block>
+    <clr-stack-block>
+      <clr-stack-label>CC</clr-stack-label>
+      <clr-stack-content>{{ service.chiefcomp }}</clr-stack-content>
+    </clr-stack-block>
+    <clr-stack-block>
+      <clr-stack-label>ความดันโลหิต</clr-stack-label>
+      <clr-stack-content>{{ service.sbp }}/{{service.dbp}}</clr-stack-content>
+    </clr-stack-block>
+  </clr-stack-block>
+</clr-stack-view>
+
+<h3>การวินิจฉัย</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>รหัสวินิจฉัย</th>
+            <th>รายการ</th>
+            <th>ประเภท</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let d of diags; let i = index">
+            <td class="center">{{ i+1 }}</td>
+            <td class="left">{{ d.diagcode }}</td>
+            <td class="left">{{ d.diagename }}</td>
+            <td class="center">{{ d.diagtype }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>หัตถการ</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th class="left">รหัส</th>
+            <th class="left">รายการ</th>
+            <th>ราคา</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let p of proceds; let i = index">
+            <td class="center">{{ i+1 }}</td>
+            <td class="left">{{ p.procedcode }}</td>
+            <td class="left">{{ p.en_desc }}</td>
+            <td class="center">{{ p.serviceprice }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>ยาที่ได้รับ</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>ชื่อยา</th>
+            <th>จำนวน</th>
+            <th>ราคา</th>
+            <th>หน่วย</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let d of drugs; let i = index">
+            <td class="center">{{ i+1 }}</td>
+            <td class="left">{{ d.dname }}</td>
+            <td>{{ d.amount }}</td>
+            <td>{{ d.drugprice }}</td>
+            <td>{{ d.unit }}</td>
+        </tr>
+    </tbody>
+</table>

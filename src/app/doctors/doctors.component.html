@@ -1,0 +1,90 @@
+<div class="main-container">
+  <header class="header-5">
+    <div class="branding">
+      <a href="javascript: void()" class="nav-link">
+        <clr-icon shape="data-cluster"></clr-icon>
+        <span class="title">โปรแกรมจัดการเอกสารประวัติผู้ป่วย (Doctor)</span>
+      </a>
+    </div>
+    <div class="header-actions">
+      <clr-dropdown class="dropdown bottom-right">
+        <button class="nav-text" clrDropdownToggle>
+            {{fullname}}
+            <clr-icon shape="caret down"></clr-icon>
+        </button>
+        <div class="dropdown-menu">
+          <a href="javascript: void()" (click)="logout()" clrDropdownItem>ออกจากระบบ</a>
+        </div>
+      </clr-dropdown>
+    </div>
+  </header>
+  <div class="content-container">
+    <div class="content-area">
+
+      <router-outlet></router-outlet>
+
+    </div>
+    <nav class="sidenav">
+      <header class="header-5">
+        <form class="search" onsubmit="return false;">
+          <label for="search_input">
+            <input autocomplete="off" #hn (keydown)="clearItems()" (keypress)="searchKeyPress($event, hn)" id="search_input" type="text" placeholder="ระบุ HN...">
+        </label>
+        </form>
+      </header>
+      <div class="content-area">
+        <clr-alert [clrAlertType]="'alert-warning'" *ngIf="isHNNotfound">
+          <div class="alert-item">
+            <span class="alert-text">
+                    กรุณาระบุ HN
+                </span>
+          </div>
+        </clr-alert>
+        <clr-tabs (clrTabsCurrentTabLinkChanged)="onTabSelected($event)">
+          <clr-tab-link [clrTabLinkId]="'hosxp'" [clrTabLinkActive]="true">HOSxP</clr-tab-link>
+          <clr-tab-link [clrTabLinkId]="'hdc'">HDC</clr-tab-link>
+
+          <clr-tab-content [clrTabContentId]="'content1'" [clrTabContentActive]="true">
+            <span class="spinner spinner-md spinner-inline" *ngIf="searching">
+                Loading...
+            </span>
+            <span *ngIf="searching">
+                กำลังค้นหา...
+            </span>
+            <clr-tree-node *ngFor="let visit of visits" [clrTreeNodeExpandable]="true">
+              <clr-icon shape="calendar"></clr-icon>
+              {{ visit.name }}
+              <clr-tree-node *ngFor="let v of visit.visits">
+                <button (click)="getEmr(v.hn, v.vn)" class="clr-treenode-link">
+            <clr-icon shape="calendar"></clr-icon>
+            {{v.vstdate}} {{ v.time }}
+            </button>
+
+              </clr-tree-node>
+            </clr-tree-node>
+          </clr-tab-content>
+          <clr-tab-content>
+            <span class="spinner spinner-md spinner-inline" *ngIf="isHDCSearching">
+                Loading...
+            </span>
+            <span *ngIf="isHDCSearching">
+                กำลังค้นหา...
+            </span>
+            <clr-tree-node *ngFor="let visit of hdcVisits" [clrTreeNodeExpandable]="true">
+              <clr-icon shape="calendar"></clr-icon>
+              {{ visit.name }}
+              <clr-tree-node *ngFor="let v of visit.visits">
+                <button (click)="getHDCEmr(v)" class="clr-treenode-link" title="{{v.hospname}}">
+            <clr-icon shape="calendar"></clr-icon>
+            {{v.date_serv}} {{ v.time_serv }} 
+            <br> [{{v.hospname}}]
+            </button>
+
+              </clr-tree-node>
+            </clr-tree-node>
+          </clr-tab-content>
+        </clr-tabs>
+      </div>
+    </nav>
+  </div>
+</div>

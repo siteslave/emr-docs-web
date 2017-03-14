@@ -1,0 +1,112 @@
+<span class="spinner spinner-md spinner-inline" *ngIf="loading">
+    Loading...
+</span>
+<span *ngIf="loading">
+    กำลังโหลดข้อมูล...
+</span>
+
+<clr-stack-view>
+  <clr-stack-block>
+    <clr-stack-label>ชื่อ {{ info.ptname }}</clr-stack-label>
+    <clr-stack-content>HN: {{ info.hn }}</clr-stack-content>
+  </clr-stack-block>
+  <clr-stack-block [clrSbExpanded]="true">
+    <clr-stack-label>ข้อมูลทั่วไป</clr-stack-label>
+    <clr-stack-block>
+      <clr-stack-label>เพศ</clr-stack-label>
+      <clr-stack-content>{{ info.sex }}</clr-stack-content>
+    </clr-stack-block>
+    <clr-stack-block>
+      <clr-stack-label>วันเกิด</clr-stack-label>
+      <clr-stack-content>{{ info.birth }} อายุ {{ info.age }} ปี</clr-stack-content>
+    </clr-stack-block>
+    <clr-stack-block>
+      <clr-stack-label>เสียชีวิต</clr-stack-label>
+      <clr-stack-content *ngIf="info.death == 'Y'"><span class="label label-danger">ผู้ป่วยเสียชีวิตแล้ว</span></clr-stack-content>
+      <clr-stack-content *ngIf="info.death == 'N' || !info.death"><span class="label label-success">ยังไม่เสียชีวิต</span></clr-stack-content>
+    </clr-stack-block>
+    <clr-stack-block>
+      <clr-stack-label>ที่อยู่</clr-stack-label>
+      <clr-stack-content>{{ info.address }}</clr-stack-content>
+    </clr-stack-block>
+    <clr-stack-block>
+      <clr-stack-label>Typearea</clr-stack-label>
+      <clr-stack-content>{{ info.typearea }}</clr-stack-content>
+    </clr-stack-block>
+    <clr-stack-block>
+      <clr-stack-label>สิทธิการรักษา (สิทธิ์ประจำตัวผู้ป่วย)</clr-stack-label>
+      <clr-stack-content>{{ info.pttype }}</clr-stack-content>
+    </clr-stack-block>
+  </clr-stack-block>
+</clr-stack-view>
+<div class="row">
+  <div class="col-md-6">
+    <div class="card">
+      <!--<div class="card-header">
+        ความดันโลหิต
+      </div>-->
+      <div class="card-block">
+        <div class="card-text">
+          <chart [options]="options"></chart>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <!--<div class="card-header">
+        ระดับน้ำตาลในเลือด (FBS)
+      </div>-->
+      <div class="card-block">
+        <div class="card-text">
+          <chart [options]="options2"></chart>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<h3>ข้อมูลการแพ้ยา</h3>
+<clr-stack-view>
+  <clr-stack-block [clrSbExpanded]="false">
+    <clr-stack-label *ngIf="allergies.length">รายการแพ้ยา <span class="badge badge-danger">{{ allergies.length }}</span></clr-stack-label>
+    <clr-stack-label *ngIf="!allergies.length">ไม่พบรายการแพ้ยา</clr-stack-label>
+    <clr-stack-block *ngFor="let a of allergies">
+      <clr-stack-label>ยา {{ a.agent }}</clr-stack-label>
+      <clr-stack-content>อาการ: {{ a.symptom }}</clr-stack-content>
+    </clr-stack-block>
+  </clr-stack-block>
+</clr-stack-view>
+<h3>คลินิคพิเศษ</h3>
+<clr-stack-view>
+  <clr-stack-block [clrSbExpanded]="false" *ngFor="let c of clinics">
+    <clr-stack-label>{{ c.clinic_name }}</clr-stack-label>
+    <clr-stack-block>
+      <clr-stack-label>ปีที่เป็น</clr-stack-label>
+      <clr-stack-content>{{ c.begin_year }}</clr-stack-content>
+    </clr-stack-block>
+    <clr-stack-block>
+      <clr-stack-label>วันที่มารับบริการล่าสุด</clr-stack-label>
+      <clr-stack-content>{{ c.lastvisit }}</clr-stack-content>
+    </clr-stack-block>
+    <clr-stack-block>
+      <clr-stack-label>นัดครั้งต่อไป</clr-stack-label>
+      <clr-stack-content>{{ c.next_app_date }}</clr-stack-content>
+    </clr-stack-block>
+    <clr-stack-block>
+      <clr-stack-label>ปรับปรุงล่าสุด</clr-stack-label>
+      <clr-stack-content>{{ c.lastupdate }}</clr-stack-content>
+    </clr-stack-block>
+  </clr-stack-block>
+</clr-stack-view>
+<h3>ผลตรวจทางห้องปฏิบัติการ (2 ปีย้อนหลัง)</h3>
+<clr-stack-view>
+  <clr-stack-block *ngFor="let lab of labs">
+    <clr-stack-label>{{ lab.date_serve }} <span class="badge badge-info">{{lab.items.length}}</span></clr-stack-label>
+    <clr-stack-content>ผล</clr-stack-content>
+    <clr-stack-block *ngFor="let item of lab.items">
+      <clr-stack-label>{{ item.lab_items_name }}</clr-stack-label>
+      <clr-stack-content><span class="label label-success">{{ item.lab_order_result }}</span> (ค่ามาตรฐาน : {{ item.lab_items_normal_value_ref}})</clr-stack-content>
+    </clr-stack-block>
+  </clr-stack-block>
+</clr-stack-view>
