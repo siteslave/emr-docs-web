@@ -66,6 +66,7 @@ export class EmrComponent implements OnInit {
   }
 
   showUploader() {
+    this.imageType = null;
     this.wizard.open();
   }
 
