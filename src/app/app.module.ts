@@ -12,6 +12,8 @@ import { DoctorsModule } from './doctors/doctors.module';
 import { LoginComponent } from './login/login.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
+import { AlertService } from "./alert.service";
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -29,6 +31,7 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
     DoctorsModule
   ],
   providers: [
+    AlertService,
     { provide: 'API_URL', useValue: 'http://localhost:3000/emr-docs' }
   ],
   bootstrap: [AppComponent]

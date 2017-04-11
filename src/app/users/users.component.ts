@@ -15,8 +15,9 @@ export class UsersComponent implements OnInit {
   hn: string;
   searching = false;
 
+  fullname: string;
   constructor(private router: Router, private emrService: EmrService) {
-
+    this.fullname = sessionStorage.getItem('fullname');
   }
 
   searchKeyPress(event, hn) {

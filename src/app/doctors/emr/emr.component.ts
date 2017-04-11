@@ -1,7 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DoctorService } from '../doctor.service';
-
+import { AlertService } from "../../alert.service";
 @Component({
   selector: 'app-emr',
   templateUrl: './emr.component.html',
@@ -23,13 +23,15 @@ export class EmrComponent implements OnInit {
   imageType: string;
   images: Array<any> = [];
   isLoading = false;
+  loadingImage = false;
   token: string;
 
   constructor(
     @Inject('API_URL') private url: string,
     private router: Router,
     private route: ActivatedRoute,
-    private doctorService: DoctorService
+    private doctorService: DoctorService,
+    private alertService: AlertService
   ) {
     this.token = sessionStorage.getItem('token');
 
@@ -51,40 +53,52 @@ export class EmrComponent implements OnInit {
     this.isLoading = true;
     this.doctorService.getDetail(vn)
       .then((resp: any) => {
-        this.ptname = resp.rows.ptname;
-        this.department = resp.rows.department;
-        this.spclty = resp.rows.spclty;
-        this.pttype = resp.rows.pttype;
-        this.diag = resp.rows.diag;
-        this.vstdate = resp.rows.vstdate;
-        this.vsttime = resp.rows.vsttime;
         this.isLoading = false;
+        if (resp.ok) {
+          this.ptname = resp.rows.ptname;
+          this.department = resp.rows.department;
+          this.spclty = resp.rows.spclty;
+          this.pttype = resp.rows.pttype;
+          this.diag = resp.rows.diag;
+          this.vstdate = resp.rows.vstdate;
+          this.vsttime = resp.rows.vsttime;
+        } else {
+          this.alertService.error(JSON.stringify(resp.error));
+        }
       })
       .catch(error => {
         console.log(error);
         this.isLoading = false;
+        this.alertService.serverError();
       });
   }
 
   getImageList(vn) {
     // get detail
+    this.loadingImage = true;
     this.doctorService.getImageList(vn)
       .then((resp: any) => {
-        this.images = [];
-        resp.rows.forEach((v) => {
-          let obj = {
-            id: v.id,
-            type: v.type,
-            filename: v.filename,
-            mimetype: v.mimetype,
-            url: `${this.url}/doctors/view-image/${v.id}?token=${this.token}`
-          };
+        this.loadingImage = false;
+        if (resp.ok) {
+          this.images = [];
+          resp.rows.forEach((v) => {
+            let obj = {
+              id: v.id,
+              type: v.type,
+              filename: v.filename,
+              mimetype: v.mimetype,
+              url: `${this.url}/doctors/view-image/${v.id}?token=${this.token}`
+            };
 
-          this.images.push(obj);
-        });
+            this.images.push(obj);
+          });
+        } else {
+          this.alertService.error(JSON.stringify(resp.error));
+        }
       })
       .catch(error => {
         console.log(error);
+        this.alertService.serverError();
       });
   }
 

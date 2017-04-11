@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DoctorService } from '../doctor.service';
+import { AlertService } from "../../alert.service";
 import { PageNotFoundComponent } from '../../page-not-found/page-not-found.component';
 import * as _ from 'lodash';
 
@@ -24,7 +25,8 @@ export class InfoComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private doctorService: DoctorService
+    private doctorService: DoctorService,
+    private alertService: AlertService
   ) {
     this.info = {ptname: null, sex: null, birth: null, pttype: null, hn: null, address: null};
     this.allergies = [];
@@ -46,139 +48,145 @@ export class InfoComponent implements OnInit {
     this.loading = true;
     this.doctorService.getInfo(this.hn)
       .then((results: any) => {
-        if (!results.info) {
-          this.router.navigateByUrl('/doctors/404');
-        }
+        if (results.ok) {
+          if (!results.info) {
+            this.router.navigateByUrl('/doctors/404');
+          }
 
-        this.info = results.info;
-        this.allergies = results.allergies;
-        this.clinics = results.clinics;
-        this.labs = results.labs;
+          this.info = results.info;
+          this.allergies = results.allergies;
+          this.clinics = results.clinics;
+          this.labs = results.labs;
 
-        this.bp = results.bp;
-        this.fbs = results.fbs;
+          this.bp = results.bp;
+          this.fbs = results.fbs;
 
-        this.options = {
-          credits: { enabled: false },
-          title: { text: 'ความดันโลหิต' },
-          chart: {
-            type: 'line'
-          },
-          xAxis: {
-            categories: [],
-            tickmarkPlacement: 'on',
-            title: {
-              enabled: false
-            }
-          },
-          yAxis: {
-            plotLines: [{
-              value: 121,
-              color: 'red',
-              width: 1,
-              label: {
-                text: 'ค่ามาตรฐาน: 120',
-                align: 'center',
-                style: {
-                  color: 'gray'
-                }
+          this.options = {
+            credits: { enabled: false },
+            title: { text: 'ความดันโลหิต' },
+            chart: {
+              type: 'line'
+            },
+            xAxis: {
+              categories: [],
+              tickmarkPlacement: 'on',
+              title: {
+                enabled: false
               }
             },
-            {
-              value: 90,
-              color: 'green',
-              width: 1,
-              label: {
-                text: 'ค่ามาตรฐาน: 90',
-                align: 'center',
-                style: {
-                  color: 'gray'
+            yAxis: {
+              plotLines: [{
+                value: 121,
+                color: 'red',
+                width: 1,
+                label: {
+                  text: 'ค่ามาตรฐาน: 120',
+                  align: 'center',
+                  style: {
+                    color: 'gray'
+                  }
                 }
-              }
-            }],
-            title: {
-              text: 'mmHg'
-            }
-          },
-          tooltip: {
-            split: true,
-            valueSuffix: ' mmHg'
-          },
-          series: [{
-            name: 'SBP',
-            data: []
-          }, {
-            name: 'DBP',
-            data: []
-          }]
-        };
-
-        this.options2 = {
-          credits: { enabled: false },
-          title: { text: 'ระดับ FBS' },
-          chart: {
-            type: 'line'
-          },
-          xAxis: {
-            categories: [],
-            tickmarkPlacement: 'on',
-            title: {
-              enabled: false
-            }
-          },
-          yAxis: {
-            plotLines: [{
-              value: 101,
-              color: 'red',
-              width: 1,
-              label: {
-                text: 'ค่ามาตรฐาน: 100',
-                align: 'center',
-                style: {
-                  color: 'gray'
+              },
+              {
+                value: 90,
+                color: 'green',
+                width: 1,
+                label: {
+                  text: 'ค่ามาตรฐาน: 90',
+                  align: 'center',
+                  style: {
+                    color: 'gray'
+                  }
                 }
+              }],
+              title: {
+                text: 'mmHg'
               }
-            }],
-            title: {
-              text: 'mg/dL'
+            },
+            tooltip: {
+              split: true,
+              valueSuffix: ' mmHg'
+            },
+            series: [{
+              name: 'SBP',
+              data: []
+            }, {
+              name: 'DBP',
+              data: []
+            }]
+          };
+
+          this.options2 = {
+            credits: { enabled: false },
+            title: { text: 'ระดับ FBS' },
+            chart: {
+              type: 'line'
+            },
+            xAxis: {
+              categories: [],
+              tickmarkPlacement: 'on',
+              title: {
+                enabled: false
+              }
+            },
+            yAxis: {
+              plotLines: [{
+                value: 101,
+                color: 'red',
+                width: 1,
+                label: {
+                  text: 'ค่ามาตรฐาน: 100',
+                  align: 'center',
+                  style: {
+                    color: 'gray'
+                  }
+                }
+              }],
+              title: {
+                text: 'mg/dL'
+              }
+            },
+            tooltip: {
+              split: true,
+              valueSuffix: ' mg/dL'
+            },
+            series: [{
+              name: 'FBS',
+              data: []
+            }]
+          };
+
+          this.options.xAxis.categories = [];
+          this.options.series[0].data = [];
+          this.options.series[1].data = [];
+          let bp = _.orderBy(this.bp, ['ymd', 'asc']);
+          let fbs = _.orderBy(this.fbs, ['ymd', 'asc']);
+
+          bp.forEach(v => {
+            // console.log(v.bps, v.bpd);
+            if (v.bps && v.bpd) {
+              this.options.xAxis.categories.push(v.vstdate);
+              this.options.series[0].data.push(v.bps);
+              this.options.series[1].data.push(v.bpd);
             }
-          },
-          tooltip: {
-            split: true,
-            valueSuffix: ' mg/dL'
-          },
-          series: [{
-            name: 'FBS',
-            data: []
-          }]
-        };
+          });
 
-        this.options.xAxis.categories = [];
-        this.options.series[0].data = [];
-        this.options.series[1].data = [];
-        let bp = _.orderBy(this.bp, ['ymd', 'asc']);
-        let fbs = _.orderBy(this.fbs, ['ymd', 'asc']);
+          fbs.forEach(v => {
+            // console.log(v.bps, v.bpd);
+            if (v.fbs) {
+              this.options2.xAxis.categories.push(v.vstdate);
+              this.options2.series[0].data.push(v.fbs);
+            }
+          });
 
-        bp.forEach(v => {
-          // console.log(v.bps, v.bpd);
-          if (v.bps && v.bpd) {
-            this.options.xAxis.categories.push(v.vstdate);
-            this.options.series[0].data.push(v.bps);
-            this.options.series[1].data.push(v.bpd);
-          }
-        });
-
-        fbs.forEach(v => {
-          // console.log(v.bps, v.bpd);
-          if (v.fbs) {
-            this.options2.xAxis.categories.push(v.vstdate);
-            this.options2.series[0].data.push(v.fbs);
-          }
-        });
-
+        } else {
+          this.alertService.error(JSON.stringify(results.message));
+        }
         this.loading = false;
-
-        // console.log(this.options.xAxis.categories);
+      })
+      .catch(() => {
+        this.loading = false;
+        this.alertService.serverError();
       });
   }
 

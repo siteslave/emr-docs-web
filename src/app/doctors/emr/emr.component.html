@@ -33,6 +33,14 @@
 </clr-stack-view>
 
 <h3>เอกสารประกอบการรักษา ({{ images.length | number }} รายการ)</h3>
+<div *ngIf="loadingImage">
+  <span class="spinner spinner-inline">
+    Loading...
+  </span>
+  <span>
+      Loading...
+  </span>
+</div>
 <div class="card-columns card-columns-4">
   <a href="javascript: void();" (click)="previewImage(image.url)" class="card clickable" *ngFor="let image of images">
      <div class="card-header">

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DoctorService } from './doctor.service';
+import { AlertService } from "../alert.service";
 import * as moment from 'moment';
 
 import { InfoComponent } from './info/info.component';
@@ -22,7 +23,7 @@ export class DoctorsComponent implements OnInit {
   token: string;
   fullname: string;
 
-  constructor(private router: Router, private doctorService: DoctorService) {
+  constructor(private router: Router, private doctorService: DoctorService, private alertService: AlertService) {
     this.token = sessionStorage.getItem('token');
     this.fullname = sessionStorage.getItem('fullname');
   }
@@ -33,31 +34,36 @@ export class DoctorsComponent implements OnInit {
     this.doctorService.hdcSearch(hn)
       .then((response: any) => {
         this.isHDCSearching = false;
-        response.rows.forEach((v: any) => {
-          let visits = [];
-          v.visits.forEach((x: any) => {
-            let obj = {
-              hospname: x.hospname,
-              hospcode: x.hospcode,
-              seq: x.seq,
-              pid: x.pid,
-              date_serv: `${moment(x.date_serv).format('D')}/${moment(x.date_serv).format('M')}/${moment(x.date_serv).get('year') + 543}`,
-              time_serv: moment(x.time_serv, 'HHmmss').format('HH:mm')
-            }
-            visits.push(obj);
+        if (response.ok) {
+          response.rows.forEach((v: any) => {
+            let visits = [];
+            v.visits.forEach((x: any) => {
+              let obj = {
+                hospname: x.hospname,
+                hospcode: x.hospcode,
+                seq: x.seq,
+                pid: x.pid,
+                date_serv: `${moment(x.date_serv).format('D')}/${moment(x.date_serv).format('M')}/${moment(x.date_serv).get('year') + 543}`,
+                time_serv: moment(x.time_serv, 'HHmmss').format('HH:mm')
+              }
+              visits.push(obj);
+            });
+
+            let obj: Object = {
+              name: v.name,
+              icon: 'folder',
+              expanded: false,
+              visits: visits
+            };
+
+            this.hdcVisits.push(obj);
           });
-
-          let obj: Object = {
-            name: v.name,
-            icon: 'folder',
-            expanded: false,
-            visits: visits
-          };
-
-          this.hdcVisits.push(obj);
-        });
+        } else {
+          this.alertService.error(JSON.stringify(response.message));
+        }
       })
       .catch((err) => {
+        this.alertService.serverError();
         console.log(err);
       });
   }
@@ -69,36 +75,40 @@ export class DoctorsComponent implements OnInit {
     this.doctorService.search(hn)
       .then((response: any) => {
         this.searching = false;
-        response.rows.forEach((v: any) => {
-          let visits = [];
-          v.visits.forEach((x: any) => {
-            let obj = {
-              hn: x.hn,
-              vn: x.vn,
-              vstdate: `${moment(x.vstdate).format('D')}/${moment(x.vstdate).format('M')}/${moment(x.vstdate).get('year') + 543}`,
-              time: moment(x.vsttime, 'HH:mm:ss').format('HH:mm')
-            }
-            visits.push(obj);
+        if (response.ok) {
+          response.rows.forEach((v: any) => {
+            let visits = [];
+            v.visits.forEach((x: any) => {
+              let obj = {
+                hn: x.hn,
+                vn: x.vn,
+                vstdate: `${moment(x.vstdate).format('D')}/${moment(x.vstdate).format('M')}/${moment(x.vstdate).get('year') + 543}`,
+                time: moment(x.vsttime, 'HH:mm:ss').format('HH:mm')
+              }
+              visits.push(obj);
+            });
+
+            let obj: Object = {
+              name: v.name,
+              icon: 'folder',
+              expanded: false,
+              visits: visits
+            };
+
+            this.visits.push(obj);
           });
 
-          let obj: Object = {
-            name: v.name,
-            icon: 'folder',
-            expanded: false,
-            visits: visits
-          };
-
-          this.visits.push(obj);
-        });
-
-        if (response.rows.length) {
-          this.router.navigateByUrl('/doctors/info/' + hn);
+          if (response.rows.length) {
+            this.router.navigateByUrl('/doctors/info/' + hn);
+          }
+        } else {
+          this.alertService.error(JSON.stringify(response.message));
         }
       })
       .catch(error => {
         this.searching = false;
         console.log(error);
-        alert('เกิดข้อผิดพลาด: ' + error.message);
+        this.alertService.error('เกิดข้อผิดพลาด: ' + JSON.stringify(error.message));
       });
   }
 
