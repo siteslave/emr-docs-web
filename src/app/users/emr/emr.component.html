@@ -61,7 +61,8 @@
 </div>
 
 
-<clr-wizard #wizard (clrWizardOpenChanged)="resetStep()" (clrWizardOnFinish)="refreshImageList()" [clrWizardClosable]="false" [clrWizardSize]="'xl'">
+<clr-wizard #wizard (clrWizardOpenChanged)="resetStep()" (clrWizardOnFinish)="refreshImageList()" [clrWizardClosable]="false"
+  [clrWizardSize]="'xl'">
   <clr-wizard-title>อัปโหลดเอกสาร</clr-wizard-title>
 
   <clr-wizard-button [type]="'cancel'">ยกเลิก</clr-wizard-button>
@@ -155,7 +156,7 @@
         </form>
       </div>
       <div class="card-footer">
-        <button class="btn btn-primary" [disabled]="isImportting || !fileName" (click)="startUpload()">อัปโหลดไฟล์!</button>
+        <!--<button class="btn btn-primary" [disabled]="isImportting" (click)="startUpload()">อัปโหลดไฟล์!</button>-->
         <span class="spinner spinner-inline" *ngIf="isImportting">
                     Uploading...
                 </span>

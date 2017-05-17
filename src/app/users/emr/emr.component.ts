@@ -75,6 +75,8 @@ export class EmrComponent implements OnInit {
 
   showUploader() {
     this.imageType = null;
+    this.response = null;
+    this.fileName.nativeElement.value = null;
     this.wizard.reset();
     this.wizard.open();
   }
@@ -83,34 +85,32 @@ export class EmrComponent implements OnInit {
     this.wizard.reset();
   }
 
-  startUpload() {
-    const file = this.fileName.nativeElement.value;
-
-    if (file) {
-      this.alertService.confirm('ต้องการนำเข้าข้อมูล ใช่หรือไม่?')
-        .then(() => {
-          this.inputUploadEvents.emit('startUpload');
-        })
-        .catch(() => {
-          // cancel
-        });
-    } else {
-      this.alertService.error('กรุณาเลือกไฟล์ที่ต้องการนำเข้าข้อมูล');
-    }
-  }
+  // startUpload() {
+  //   const file = this.fileName.nativeElement.value;
+  //   if (file) {
+  //     this.alertService.confirm('ต้องการนำเข้าข้อมูล ใช่หรือไม่?')
+  //       .then(() => {
+  //         this.isImportting = true;
+  //         this.inputUploadEvents.emit('startUpload');
+  //       })
+  //       .catch(() => {
+  //         // cancel
+  //       });
+  //   } else {
+  //     this.alertService.error('กรุณาเลือกไฟล์ที่ต้องการนำเข้าข้อมูล');
+  //   }
+  // }
 
   handleUpload(data: any) {
-    console.log('Starting upload...');
-    this.isImportting = true;
     setTimeout(() => {
       this.zone.run(() => {
         this.response = data;
         if (data && data.response) {
           this.isImportting = false;
           const result = JSON.parse(data.response);
-          console.log(result);
           if (result.ok) {
             this.alertService.success();
+            this.fileName.nativeElement.value = null;
           } else {
             this.alertService.error('เกิดข้อผิดพลาด : ' + JSON.stringify(result.message));
           }
@@ -119,21 +119,18 @@ export class EmrComponent implements OnInit {
     });
   }
 
-  fileOverBase(e: boolean) {
-    this.hasBaseDropZoneOver = e;
-  }
-
   changeType() {
     if (this.imageType) {
       this.options = new NgUploaderOptions({
-        url: `${this.url}/users/uploads?token=${this.token}`,
+        url: `${this.url}/users/uploads`,
         data: {
           hn: this.hn,
           vn: this.vn,
           imageType: this.imageType
         },
         filterExtensions: false,
-        autoUpload: false
+        autoUpload: true,
+        authToken: this.token
       });
     }
   }
