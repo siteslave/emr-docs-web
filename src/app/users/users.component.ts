@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { EmrService } from './emr.service';
 import * as moment from 'moment';
-
+import { AlertService } from '../alert.service';
 @Component({
   selector: 'app-users',
   templateUrl: './users.component.html',
@@ -16,7 +16,11 @@ export class UsersComponent implements OnInit {
   searching = false;
 
   fullname: string;
-  constructor(private router: Router, private emrService: EmrService) {
+  constructor(
+    private router: Router,
+    private emrService: EmrService,
+    private alertSesrvice: AlertService
+  ) {
     this.fullname = sessionStorage.getItem('fullname');
   }
 
@@ -27,32 +31,38 @@ export class UsersComponent implements OnInit {
       this.emrService.search(hn.value)
         .then((response: any) => {
           this.searching = false;
-          response.rows.forEach((v: any) => {
-            let visits = [];
-            v.visits.forEach((x: any) => {
-              let obj = {
-                hn: x.hn,
-                vn: x.vn,
-                vstdate: `${moment(x.vstdate).format('D')}/${moment(x.vstdate).format('M')}/${moment(x.vstdate).get('year') + 543}`,
-                time: moment(x.vsttime, 'HH:mm:ss').format('HH:mm')
-              }
-              visits.push(obj);
+          try {
+            response.rows.forEach((v: any) => {
+              let visits = [];
+              v.visits.forEach((x: any) => {
+                let obj = {
+                  hn: x.hn,
+                  vn: x.vn,
+                  vstdate: `${moment(x.vstdate).format('D')}/${moment(x.vstdate).format('M')}/${moment(x.vstdate).get('year') + 543}`,
+                  time: moment(x.vsttime, 'HH:mm:ss').format('HH:mm')
+                }
+                visits.push(obj);
+              });
+
+              let obj: Object = {
+                name: v.name,
+                icon: 'folder',
+                expanded: false,
+                visits: visits
+              };
+
+              this.visits.push(obj);
             });
+          } catch (error) {
+            this.searching = false;
+            this.alertSesrvice.error('เกิดข้อผิดพลาด: ' + JSON.stringify(error.message));
+          }
 
-            let obj: Object = {
-              name: v.name,
-              icon: 'folder',
-              expanded: false,
-              visits: visits
-            };
-
-            this.visits.push(obj);
-          });
         })
         .catch(error => {
           this.searching = false;
           console.log(error);
-          alert('เกิดข้อผิดพลาด: ' + error.message);
+          this.alertSesrvice.error('เกิดข้อผิดพลาด: ' + error.message);
         });
     }
   }
