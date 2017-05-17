@@ -13,7 +13,8 @@ import { DoctorsModule } from './doctors/doctors.module';
 import { LoginComponent } from './login/login.component';
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
-import { AlertService } from "./alert.service";
+import { AlertService } from './alert.service';
+import { environment } from '../environments/environment';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,7 @@ import { AlertService } from "./alert.service";
   ],
   providers: [
     AlertService,
-    { provide: 'API_URL', useValue: 'http://localhost:3000/emr-docs' }
+    { provide: 'API_URL', useValue: environment.apiUrl }
   ],
   bootstrap: [AppComponent]
 })
