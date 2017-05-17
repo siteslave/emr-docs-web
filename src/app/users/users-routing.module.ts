@@ -12,8 +12,8 @@ const routes: Routes = [
     component: UsersComponent,
     canActivate: [UserGuardService],
     children: [
-      { path: '', component: MainComponent, pathMatch: 'full' },
-      { path: 'emr/:hn/:vn', component: EmrComponent, pathMatch: 'full' }
+      { path: '', component: MainComponent, pathMatch: 'full'},
+      { path: 'emr/:hn/:vn', component: EmrComponent, pathMatch: 'full'}
     ]
   }
 ];

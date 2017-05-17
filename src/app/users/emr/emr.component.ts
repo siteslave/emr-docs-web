@@ -1,9 +1,10 @@
-import { Component, OnInit, ViewChild, Inject, NgZone } from '@angular/core';
+import { Component, OnInit, ViewChild, Inject, NgZone, EventEmitter } from '@angular/core';
 import { Wizard, WizardStep } from 'clarity-angular';
-import { NgUploaderOptions } from 'ngx-uploader';
+import { NgUploaderOptions, UploadedFile, UploadRejected } from 'ngx-uploader';
 
 import { Router, ActivatedRoute } from '@angular/router';
 import { EmrService } from '../emr.service';
+import { AlertService } from '../../alert.service';
 
 @Component({
   selector: 'app-emr',
@@ -11,15 +12,18 @@ import { EmrService } from '../emr.service';
   styleUrls: ['./emr.component.css']
 })
 export class EmrComponent implements OnInit {
+  @ViewChild('file') fileName: any;
+  @ViewChild('wizard') wizard: Wizard;
 
   options: NgUploaderOptions;
   response: any;
   hasBaseDropZoneOver: boolean;
-  @ViewChild('wizard') wizard: Wizard;
+  inputUploadEvents: EventEmitter<string>;
 
   isLoading = false;
   isError = false;
   isSuccess = false;
+  isImportting = false;
   vstdate: string;
   vsttime: string;
   firstStep = 0;
@@ -41,15 +45,17 @@ export class EmrComponent implements OnInit {
     @Inject('API_URL') private url: string,
     private router: Router,
     private route: ActivatedRoute,
-    private emrService: EmrService
+    private emrService: EmrService,
+    private alertService: AlertService
   ) {
     this.token = sessionStorage.getItem('token');
 
+    this.hn = this.route.snapshot.params.hn;
+    this.vn = this.route.snapshot.params.vn;
     this.route.params.subscribe((params: any) => {
       // console.log(params);
       this.hn = params.hn;
       this.vn = params.vn;
-
       // console.log(this.hn);
       // console.log(this.vn);
       this.getEmrDetail(this.vn);
@@ -63,38 +69,51 @@ export class EmrComponent implements OnInit {
     this.docTypes.push({ id: 4, name: 'ใบส่งต่อ' });
     this.docTypes.push({ id: 5, name: 'เอกสารอื่นๆ' });
 
+    this.inputUploadEvents = new EventEmitter<string>();
+
   }
 
   showUploader() {
     this.imageType = null;
+    this.wizard.reset();
     this.wizard.open();
   }
 
   resetStep() {
-    this.wizard.prev();
-    this.getImageList(this.vn);
+    this.wizard.reset();
+  }
+
+  startUpload() {
+    const file = this.fileName.nativeElement.value;
+
+    if (file) {
+      this.alertService.confirm('ต้องการนำเข้าข้อมูล ใช่หรือไม่?')
+        .then(() => {
+          this.inputUploadEvents.emit('startUpload');
+        })
+        .catch(() => {
+          // cancel
+        });
+    } else {
+      this.alertService.error('กรุณาเลือกไฟล์ที่ต้องการนำเข้าข้อมูล');
+    }
   }
 
   handleUpload(data: any) {
+    console.log('Starting upload...');
+    this.isImportting = true;
     setTimeout(() => {
       this.zone.run(() => {
         this.response = data;
         if (data && data.response) {
-          let result = JSON.parse(data.response);
+          this.isImportting = false;
+          const result = JSON.parse(data.response);
+          console.log(result);
           if (result.ok) {
-            this.isSuccess = true;
-            this.isError = false;
+            this.alertService.success();
           } else {
-            this.isSuccess = false;
-            this.isError = true;
+            this.alertService.error('เกิดข้อผิดพลาด : ' + JSON.stringify(result.message));
           }
-
-          setTimeout(() => {
-            this.isSuccess = false;
-            this.isError = false;
-          }, 2000);
-
-          console.log(data.response);
         }
       });
     });
@@ -108,13 +127,13 @@ export class EmrComponent implements OnInit {
     if (this.imageType) {
       this.options = new NgUploaderOptions({
         url: `${this.url}/users/uploads?token=${this.token}`,
-        allowedExtensions: ['jpg', 'png'],
         data: {
           hn: this.hn,
           vn: this.vn,
           imageType: this.imageType
         },
-        filterExtensions: true
+        filterExtensions: false,
+        autoUpload: false
       });
     }
   }
@@ -139,17 +158,20 @@ export class EmrComponent implements OnInit {
       });
   }
 
+  refreshImageList() {
+    this.getImageList(this.vn);
+  }
+
   getImageList(vn) {
     // get detail
     this.emrService.getImageList(vn)
       .then((resp: any) => {
         this.images = [];
-
         resp.rows.forEach((v) => {
           let obj = {
             id: v.id,
-            type: v.type,
-            filename: v.filename,
+            image_type: v.image_type,
+            file_name: v.file_name,
             mimetype: v.mimetype,
             url: `${this.url}/users/view-image/${v.id}?token=${this.token}`
           };
@@ -158,23 +180,27 @@ export class EmrComponent implements OnInit {
         });
       })
       .catch(error => {
-        console.log(error);
+        this.alertService.error('เกิดข้อผิดพลาด : ' + JSON.stringify(error));
       });
   }
 
   removeImage(id) {
-    if (confirm('คุณต้องการลบภาพนี้ ใช่หรือไม่?')) {
-      this.emrService.removeImage(id)
-        .then((resp: any) => {
-          if (resp.ok) {
-            this.getImageList(this.vn);
-          }
-        })
-        .catch(err => {
-          alert('เกิดข้อผิดพลาด: ' + JSON.stringify(err));
-          console.log(err);
-        });
-    }
+    this.alertService.confirm('คุณต้องการลบภาพนี้ ใช่หรือไม่?')
+      .then(() => {
+        this.emrService.removeImage(id)
+          .then((resp: any) => {
+            if (resp.ok) {
+              this.getImageList(this.vn);
+            }
+          })
+          .catch(err => {
+            alert('เกิดข้อผิดพลาด: ' + JSON.stringify(err));
+            console.log(err);
+          });
+      })
+      .catch(() => {
+        //
+      })
   }
 
   ngOnInit() {

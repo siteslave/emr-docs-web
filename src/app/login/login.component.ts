@@ -28,9 +28,10 @@ export class LoginComponent implements OnInit {
             this.isError = false;
             sessionStorage.setItem('token', resp.token);
             const decodedToken = this.jwtHelper.decodeToken(resp.token);
-            sessionStorage.setItem('usertype', decodedToken.user_type);
+            console.log(decodedToken);
+            sessionStorage.setItem('usertype', decodedToken.usertype);
             sessionStorage.setItem('fullname', decodedToken.fullname);
-            if (decodedToken.user_type === '1') {
+            if (decodedToken.usertype === '1') {
               this.router.navigate(['users']);
             } else {
               this.router.navigate(['doctors']);

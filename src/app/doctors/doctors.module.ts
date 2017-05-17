@@ -20,11 +20,12 @@ import { HighchartsStatic } from 'angular2-highcharts/dist/HighchartsService';
 export function highchartsFactory() {
   return require('highcharts');
 }
-// export function highchartsFactory() {
-//   return function () {
-//     require('highcharts');
-//   };
-// }
+
+const Highcharts = require('highcharts');
+
+Highcharts.setOptions({
+  credits: false
+});
 
 @NgModule({
   imports: [

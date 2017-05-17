@@ -47,6 +47,7 @@
           {{ visit.name }}
           <clr-tree-node *ngFor="let v of visit.visits">
             <button (click)="getEmr(v.hn, v.vn)" class="clr-treenode-link">
+            <!--<button [routerLink]="[{ outlets:{ detail:['emr-detail',v.hn, v.vn]}}]" class="clr-treenode-link">-->
             <clr-icon shape="calendar"></clr-icon>
             {{v.vstdate}} {{ v.time }}
             </button>
