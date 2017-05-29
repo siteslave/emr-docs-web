@@ -120,7 +120,8 @@
           + เพิ่มไฟล์...
         </label>
         <button class="btn btn-sm btn-danger" (click)="upload()" [disabled]="!filesUploads.length || isUploading">อัปโหลด</button>
-        <span class="spinner" *ngIf="isUploading">กำลังอัปโหลด...</span>
+        <span class="spinner" *ngIf="isUploading"></span>
+        <small>เลือกหลายไฟล์ ให้กด Ctrl หรือ Shift ค้างไว้แล้วเลือกไฟล์ที่ต้องการ</small>
         <clr-datagrid>
           <clr-dg-column [style.width.%]="50">ชื่อไฟล์</clr-dg-column>
           <clr-dg-column [style.width.%]="15">ขนาด (Byte)</clr-dg-column>
