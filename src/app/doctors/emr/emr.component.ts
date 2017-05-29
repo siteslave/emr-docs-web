@@ -84,9 +84,9 @@ export class EmrComponent implements OnInit {
           resp.rows.forEach((v) => {
             let obj = {
               id: v.id,
-              type: v.type,
-              filename: v.filename,
-              mimetype: v.mimetype,
+              image_type: v.image_type,
+              file_name: v.file_name,
+              mime_type: v.mime_type,
               url: `${this.url}/doctors/view-image/${v.id}?token=${this.token}`
             };
 

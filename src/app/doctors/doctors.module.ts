@@ -6,7 +6,6 @@ import { DoctorsRoutingModule } from './doctors-routing.module';
 import { DoctorsComponent } from './doctors.component';
 import { MainComponent } from './main/main.component';
 import { ClarityModule } from 'clarity-angular';
-import { NgUploaderModule } from 'ngx-uploader';
 import { AuthModule } from '../auth/auth.module';
 import { DoctorService } from './doctor.service';
 import { EmrComponent } from './emr/emr.component';

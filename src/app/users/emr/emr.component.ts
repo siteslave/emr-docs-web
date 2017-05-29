@@ -1,10 +1,12 @@
+import { UploadingService } from './../../uploading.service';
 import { Component, OnInit, ViewChild, Inject, NgZone, EventEmitter } from '@angular/core';
 import { Wizard, WizardStep } from 'clarity-angular';
-import { NgUploaderOptions, UploadedFile, UploadRejected } from 'ngx-uploader';
 
 import { Router, ActivatedRoute } from '@angular/router';
 import { EmrService } from '../emr.service';
 import { AlertService } from '../../alert.service';
+import * as filesize from 'filesize';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-emr',
@@ -12,18 +14,11 @@ import { AlertService } from '../../alert.service';
   styleUrls: ['./emr.component.css']
 })
 export class EmrComponent implements OnInit {
-  @ViewChild('file') fileName: any;
   @ViewChild('wizard') wizard: Wizard;
-
-  options: NgUploaderOptions;
-  response: any;
-  hasBaseDropZoneOver: boolean;
-  inputUploadEvents: EventEmitter<string>;
-
   isLoading = false;
   isError = false;
   isSuccess = false;
-  isImportting = false;
+  isUploading = false;
   vstdate: string;
   vsttime: string;
   firstStep = 0;
@@ -40,13 +35,16 @@ export class EmrComponent implements OnInit {
   images: Array<any> = [];
   token: string;
 
+  filesUploads: Array<File> = [];
+
   constructor(
     @Inject(NgZone) private zone: NgZone,
     @Inject('API_URL') private url: string,
     private router: Router,
     private route: ActivatedRoute,
     private emrService: EmrService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private uploadingService: UploadingService
   ) {
     this.token = sessionStorage.getItem('token');
 
@@ -69,15 +67,12 @@ export class EmrComponent implements OnInit {
     this.docTypes.push({ id: 4, name: 'ใบส่งต่อ' });
     this.docTypes.push({ id: 5, name: 'เอกสารอื่นๆ' });
 
-    this.inputUploadEvents = new EventEmitter<string>();
-
   }
 
   showUploader() {
     this.imageType = null;
-    this.response = null;
-    this.fileName.nativeElement.value = null;
     this.wizard.reset();
+    this.filesUploads = [];
     this.wizard.open();
   }
 
@@ -85,56 +80,49 @@ export class EmrComponent implements OnInit {
     this.wizard.reset();
   }
 
-  // startUpload() {
-  //   const file = this.fileName.nativeElement.value;
-  //   if (file) {
-  //     this.alertService.confirm('ต้องการนำเข้าข้อมูล ใช่หรือไม่?')
-  //       .then(() => {
-  //         this.isImportting = true;
-  //         this.inputUploadEvents.emit('startUpload');
-  //       })
-  //       .catch(() => {
-  //         // cancel
-  //       });
-  //   } else {
-  //     this.alertService.error('กรุณาเลือกไฟล์ที่ต้องการนำเข้าข้อมูล');
-  //   }
-  // }
-
-  handleUpload(data: any) {
-    setTimeout(() => {
-      this.zone.run(() => {
-        this.response = data;
-        if (data && data.response) {
-          this.isImportting = false;
-          const result = JSON.parse(data.response);
-          if (result.ok) {
-            this.alertService.success();
-            this.fileName.nativeElement.value = null;
-          } else {
-            this.alertService.error('เกิดข้อผิดพลาด : ' + JSON.stringify(result.message));
-          }
-        }
-      });
-    });
+  fileChangeEvent(fileInput: any) {
+    this.filesUploads = [];
+    this.filesUploads = <Array<File>>fileInput.target.files;
+    console.log(typeof this.filesUploads); 
   }
 
-  changeType() {
-    if (this.imageType) {
-      this.options = new NgUploaderOptions({
-        url: `${this.url}/users/uploads`,
-        data: {
-          hn: this.hn,
-          vn: this.vn,
-          imageType: this.imageType
-        },
-        filterExtensions: false,
-        autoUpload: true,
-        authToken: this.token
+  upload() {
+    if (this.filesUploads.length) {
+    let data = {
+      hn: this.hn,
+      vn: this.vn,
+      imageType: this.imageType
+    }
+    this.isUploading = true;
+    const url = `${this.url}/users/uploads?token=${this.token}`;
+    this.uploadingService.makeFileRequest(url, data, this.filesUploads)
+      .then((result: any) => {
+        if (result.ok) {
+          this.filesUploads = [];
+          this.alertService.success();
+        } else {
+          this.alertService.error(JSON.stringify(result.error));
+        }
+        this.isUploading = false;
+      }, (error) => {
+        this.isUploading = false;
+        this.alertService.error(JSON.stringify(error));
       });
+    } else {
+      this.alertService.error('กรุณาเลืิอกไฟล์ที่ต้องการอัปโหลด');
     }
   }
 
+  removeFile(name) {
+    this.alertService.confirm('ต้องการลบไฟล์นี้ ใช่หรือไม่')
+      .then(() => {
+        console.log(name);
+        this.filesUploads = _.reject(this.filesUploads, function(el) { return el.name === name; });
+      })
+      .catch(() => {
+        // cancel
+      });
+  }
   getEmrDetail(vn) {
     // get detail
     this.isLoading = true;

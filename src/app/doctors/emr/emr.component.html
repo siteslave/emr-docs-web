@@ -8,6 +8,11 @@
   </span>
 </div>
 
+<nav class="breadcrumb">
+  <a class="breadcrumb-item" href="javascript://" [routerLink]="['/doctors/info', hn]">หน้าหลัก</a>
+  <span class="breadcrumb-item active">เอกสารประกอบการรักษา</span>
+</nav>
+
 <clr-stack-view>
   <clr-stack-block>
     <clr-stack-label>ชื่อ {{ ptname }}</clr-stack-label>
@@ -44,14 +49,14 @@
 <div class="card-columns card-columns-4">
   <a href="javascript: void();" (click)="previewImage(image.url)" class="card clickable" *ngFor="let image of images">
      <div class="card-header">
-                {{ image.type | imageType }}
+                {{ image.image_type | imageType }}
             </div>
     <div class="card-img">
       <img [src]="image.url">
     </div>
     <div class="card-block">
       <p class="card-text">
-        ชื่อไฟล์ <strong>{{ image.filename }}</strong>
+        ชื่อไฟล์ <strong>{{ image.file_name }}</strong>
       </p>
     </div>
   </a>

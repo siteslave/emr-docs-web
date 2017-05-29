@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { AppRoutingModule } from './app-routing.module';
 import { ClarityModule } from 'clarity-angular';
-import { NgUploaderModule } from 'ngx-uploader';
 
 import { AppComponent } from './app.component';
 import { UsersModule } from './users/users.module';
@@ -28,7 +27,6 @@ import { environment } from '../environments/environment';
     HttpModule,
     BrowserAnimationsModule,
     AppRoutingModule,
-    NgUploaderModule,
     ClarityModule.forRoot(),
     UsersModule,
     DoctorsModule

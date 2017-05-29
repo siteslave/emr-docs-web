@@ -68,7 +68,7 @@
   <clr-wizard-button [type]="'cancel'">ยกเลิก</clr-wizard-button>
   <clr-wizard-button [type]="'previous'">กลับ</clr-wizard-button>
   <clr-wizard-button [type]="'next'">ถัดไป</clr-wizard-button>
-  <clr-wizard-button [type]="'finish'">สิ้นสุด</clr-wizard-button>
+  <clr-wizard-button [type]="'finish'">ปิดหน้าต่าง</clr-wizard-button>
 
   <div class="alert alert-warning alert-sm" *ngIf="isError">
     <button type="button" class="close" aria-label="Close">
@@ -98,7 +98,7 @@
         <div class="form-group">
           <label for="selects_1">เลือกประเภทเอกสารที่ต้องการ</label>
           <div class="select">
-            <select id="selects_1" name="sl_type" [(ngModel)]="imageType" (change)="changeType()">
+            <select id="selects_1" name="sl_type" [(ngModel)]="imageType">
                   <option value="">เลือกประเภทไฟล์</option>
                     <option *ngFor="let item of docTypes" [value]="item.id">{{ item.id }} - {{ item.name }}</option>
                 </select>
@@ -110,60 +110,35 @@
 
   <clr-wizard-page>
     <ng-template clrPageTitle>เลือกไฟล์ที่ต้องการ</ng-template>
-    <!--<div class="drag-n-drop-container" ngFileDrop [options]="options" (onUpload)="handleUpload($event)" [ngClass]="{'file-over': hasBaseDropZoneOver}"
-            (onFileOver)="fileOverBase($event)">
-            <h1>วางภาพลงที่นี่</h1>
-            <label class="upload-button">
-    <input type="file"
-           class="hidden"
-           ngFileSelect
-           [options]="options"
-           (onUpload)="handleUpload($event)">
-    Browse
-  </label>
-        </div>-->
 
-    <div class="card">
-      <div class="card-header">
-        อัปโหลดไฟล์เพื่อนำเข้าข้อมูล
-      </div>
-      <div class="card-block">
-        <form>
-          <section class="form-block">
-            <div class="form-group row">
-              <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
-                <label for="gForm_1">เลือกไฟล์ <br />(.jpg, jpeg, .png, .pdf)</label>
-              </div>
-              <div class="col-lg-7 col-md-7 col-sm-12 col-xs-12">
-                <input class="form-control" name="txtFilePath" disabled type="text" id="txtFile" placeholder="..." [value]="file.value">
-              </div>
-              <div class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
-                <div>
-                  <label class="btn btn-primary-outline btn-sm">
-                          <input type="file" #file
-                              accept=".pdf,image/*"
-                              class="hidden"
-                              ngFileSelect
-                              [events]="inputUploadEvents"
-                              [options]="options"
-                              (onUpload)="handleUpload($event)">
-                          เลือกไฟล์...
-                        </label>
-                </div>
-              </div>
-            </div>
-          </section>
-        </form>
-      </div>
-      <div class="card-footer">
-        <!--<button class="btn btn-primary" [disabled]="isImportting" (click)="startUpload()">อัปโหลดไฟล์!</button>-->
-        <span class="spinner spinner-inline" *ngIf="isImportting">
-                    Uploading...
-                </span>
-        <span *ngIf="isImportting">
-                    Uploading...
-                </span>
-      </div>
-    </div>
+            <label class="btn btn-sm btn-success" style="margin: 0px;">
+          <input type="file" #file
+              accept="image/*,.pdf"
+              class="hidden"
+              multiple
+              (change)="fileChangeEvent($event)">
+          + เพิ่มไฟล์...
+        </label>
+        <button class="btn btn-sm btn-danger" (click)="upload()" [disabled]="!filesUploads.length || isUploading">อัปโหลด</button>
+        <span class="spinner" *ngIf="isUploading">กำลังอัปโหลด...</span>
+        <clr-datagrid>
+          <clr-dg-column [style.width.%]="50">ชื่อไฟล์</clr-dg-column>
+          <clr-dg-column [style.width.%]="15">ขนาด (Byte)</clr-dg-column>
+          <clr-dg-column [style.width.%]="15">ประเภท</clr-dg-column>
+          <clr-dg-column [style.width.%]="10">#</clr-dg-column>
+
+          <clr-dg-row *ngFor="let file of filesUploads; let idx = index;">
+            <clr-dg-cell>{{file.name}}</clr-dg-cell>
+            <clr-dg-cell>{{file.size}}</clr-dg-cell>
+            <clr-dg-cell>{{file.type}}</clr-dg-cell>
+            <clr-dg-cell>
+              <a href="javascript://" (click)="removeFile(file.name)" class="label label-warning clickable">
+                  ลบ
+              </a>
+            </clr-dg-cell>
+          </clr-dg-row>
+
+          <clr-dg-footer>{{filesUploads.length}} file(s)</clr-dg-footer>
+        </clr-datagrid>
   </clr-wizard-page>
 </clr-wizard>
