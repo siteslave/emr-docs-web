@@ -15,6 +15,8 @@ import * as _ from 'lodash';
 })
 export class EmrComponent implements OnInit {
   @ViewChild('wizard') wizard: Wizard;
+  @ViewChild('file') file: any;
+
   isLoading = false;
   isError = false;
   isSuccess = false;
@@ -73,6 +75,7 @@ export class EmrComponent implements OnInit {
     this.imageType = null;
     this.wizard.reset();
     this.filesUploads = [];
+    this.file.nativeElement.value = null;
     this.wizard.open();
   }
 
