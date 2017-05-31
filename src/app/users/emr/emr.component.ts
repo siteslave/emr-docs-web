@@ -102,6 +102,7 @@ export class EmrComponent implements OnInit {
       .then((result: any) => {
         if (result.ok) {
           this.filesUploads = [];
+          this.file.nativeElement.value = null;
           this.alertService.success();
         } else {
           this.alertService.error(JSON.stringify(result.error));
